@@ -1,0 +1,14 @@
+Pokretanje master password: "./job.sh init master"
+Pospremanje para adresa-šifra(www.fer.hr-sifra) uz pomoć master passworda: "./job.sh put master www.fer.hr sifra"
+Dolazak do šifre preko adrese uz pomoć master passworda: "./job.sh get master www.fer.hr"
+
+
+Za derivaciju ključa koristio sam PBKDF2 algoritam. Funkcija prima neku šifru(master password) i nasumično izgenerirani niz bajtova(salt) i derivira jedan ili više ključeva.
+Za enkripciju i dekripciju koristim EAX mode AES cipher-a. Koristim EAX jer mi osigurava povjerljivost i cjelovitost.
+Način na koji EAX to radi je pomoću tag-a, kojeg dobijemo iz ciphera preko ključa, i koji nam omogućuje da prepoznamo da li je došlo do ikakve promjene na disku.
+Nonce osigura da se svaka poruka koja se enkriptira s istim ključem unikatna, kako napadač nebi mogao pronaći neki uzorak u enkripciji.
+Zapis na disk sam implementirao tako što sam svaki put zapisao string koji sadrži nonce, tag, salt i poslje toga enkriptirane parove adrese i šifre odvojene razmakom
+
+U slučaju da se ponovno pokrene naredba init, program neće ništa novo napraviti nego samo ispisati: "Password manager is already initialized"
+Prilikom unoska krivog master passworda ili ako smo mijenjali orginalni bin program će ispisati: "Wrong master password or detected tampering with file"
+Ako se pokuša unijeti nova šifra na već postojeću adresu, stara šifra će se obrisati, a nova će se spremiti
